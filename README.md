@@ -5,7 +5,7 @@
 * open gith bash console in preferred localization
 * type:
     
-    > git clone https://github.com/kaszalotstefan/glosso-speechrate
+    > git clone https://github.com/juliajuros/speech_rate
 
 * move to folder with cloned repositorium:
 
