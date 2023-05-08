@@ -20,8 +20,4 @@
 * activate enviroment:
 
     > conda activate glosso-speechrate
-    
-* open jupyter notebook:
 
-    > jupyter notebook
-    
