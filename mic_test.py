@@ -52,7 +52,7 @@ try:
             previous_frame_float = frame_float  # sr is counted from 2 sec data
             previous_is_speech = is_speech  # sr is counted from 2 sec data
         else:
-            print("unvoiced segment")
+            print("unvoiced segment\n")
 
 except KeyboardInterrupt:
     pass

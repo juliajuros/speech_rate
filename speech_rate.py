@@ -1,9 +1,9 @@
 import os
-import pickle
+# import pickle
 import numpy as np
 import scipy
 from attr import dataclass
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 from numpy import sqrt, mean, floor, dot, zeros, array, ndarray, argmin, insert
 from scipy.signal.windows import gaussian
 from scipy.ndimage import gaussian_filter
@@ -59,7 +59,7 @@ class SpeechRateEstimator:
         )  # number of pairs between sub-bands for subbands correlation
         self.A = int(self.fs / self.resample_fs)  # resampling parameter
         self.energy_win_len = int(self.resample_fs / 50)  # 18 samples, 20 ms (fs = 900)
-        self.energy_hop_len = int(self.resample_fs / 100)  # 9 samples, ~10 ms
+        self.energy_hop_len = int(self.resample_fs / 100)  # 9 samples, 10 ms
         self.energy_fs = (
                 self.resample_fs / self.energy_hop_len
         )  # sample rate after extracting energy in windows - 100 Hz
@@ -162,8 +162,7 @@ class SpeechRateEstimator:
                 )
         y_temp_correlated = (
                 8 * y_temp_correlated.T
-        )  # checked how this function works for constant signal and the
-        # same (approximately) values before and after I get when I multiplied by 8
+        )
         return y_temp_correlated
 
     def apply_subband_correlation(self, y_temp_correlated: ndarray) -> ndarray:
@@ -257,7 +256,6 @@ class SpeechRateEstimator:
         f0, voiced_flag, voiced_probs = pyin(
             x, fmin=65, fmax=2093, sr=self.fs, frame_length=self.pyin_frame_len
         )
-        # in documentation frame length was ~10 x less than sr
         pyin_ref = []
         for i in voiced_flag:
             if i:
@@ -270,12 +268,11 @@ class SpeechRateEstimator:
             if len(voiced_flag) < index + 1:
                 if (
                         voiced_flag[index] or voiced_flag[index - 1] or voiced_flag[index + 1]
-                ):  # voiced_flag[int(floor(peaks[p] / self.pyin_win_len))]:
+                ):
                     peaks_with_voicing.append(peaks[p])
             else:
                 if (
-                        voiced_flag[index] or voiced_flag[
-                    index - 1]):  # voiced_flag[int(floor(peaks[p] / self.pyin_win_len))]:
+                        voiced_flag[index] or voiced_flag[index - 1]):
                     peaks_with_voicing.append(peaks[p])
         return peaks_with_voicing, pyin_ref
 
@@ -347,7 +344,7 @@ class SpeechRateEstimator:
         else:
             raise ValueError
         if normalize:
-            x = x / sqrt(mean(x ** 2))  # * 2e15
+            x = x / sqrt(mean(x ** 2))
         filtered = self.filter(x, sb)
         energy_envelopes = self.extract_energy(x, filtered)
         if "all_subbands" not in opts:
@@ -408,30 +405,24 @@ class SpeechRateEstimator:
             else:
                 self.buffer_sr.append(0)
             sr_mean = np.sum(self.buffer_sr) / len(self.buffer_sr)
-            print(self.buffer_sr, sr_mean)
+            print("mean speech rate: ", sr_mean, " syllables per second")
             pdf_s = scipy.stats.norm(self.mean_s, self.std_s).pdf(sr_mean)
             pdf_n = scipy.stats.norm(self.mean_n, self.std_n).pdf(sr_mean)
             pdf_f = scipy.stats.norm(self.mean_f, self.std_f).pdf(sr_mean)
-            pdf = [pdf_s, pdf_n, pdf_f]  # probability density function
+
             p_sum = (pdf_s * 1 / 3 + pdf_n * 1 / 3 + pdf_f * 1 / 3)
-            lh_s = pdf_s * 1 / 3 / p_sum
-            lh_n = pdf_n * 1 / 3 / p_sum
-            lh_f = pdf_f * 1 / 3 / p_sum
+            prob_s = pdf_s * 1 / 3 / p_sum
+            prob_n = pdf_n * 1 / 3 / p_sum
+            prob_f = pdf_f * 1 / 3 / p_sum
 
-            lh = [lh_s, lh_n, lh_f]  # probability
-            max_lh = lh.index(max(lh))
+            prob = [prob_s, prob_n, prob_f]  # probability
+            max_prob = prob.index(max(prob))
 
-            log_lh = np.log(lh)
-            log_lh = list(log_lh)  # log probability
-            max_log_lh = log_lh.index(max(log_lh))
-
-            print("likelihood: " + str(lh) + ", max: " + str(max_lh))
-            # print("log likelihood: " + str(log_lf) + ", max: " + str(max_log_lh))
-            max_pdf = pdf.index(max(pdf))
-            if max_lh == 0:
-                print("slow")
-            if max_lh == 1:
-                print("normal")
-            if max_lh == 2:
-                print("fast")
+            print("probability: " + str(prob) + ", max: " + str(max_prob))
+            if max_prob == 0:
+                print("speech rate: slow\n")
+            if max_prob == 1:
+                print("speech rate: normal\n")
+            if max_prob == 2:
+                print("speech rate: fast\n")
         return self.buffer_sr
