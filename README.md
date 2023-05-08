@@ -1,5 +1,3 @@
-# glosso-speechrate
-
 # Speech rate estimation via temporal correlation and selected sub-band correlation
 # https://ieeexplore.ieee.org/abstract/document/1415138
 
